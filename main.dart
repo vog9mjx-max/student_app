@@ -4,8 +4,21 @@ void main() {
   runApp(const StudentApp());
 }
 
-class StudentApp extends StatelessWidget {
+class StudentApp extends StatefulWidget {
   const StudentApp({super.key});
+
+  @override
+  State<StudentApp> createState() => _StudentAppState();
+}
+
+class _StudentAppState extends State<StudentApp> {
+  bool isDarkMode = false;
+
+  void toggleTheme() {
+    setState(() {
+      isDarkMode = !isDarkMode;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -13,22 +26,26 @@ class StudentApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Student App',
       theme: ThemeData(
+        brightness: isDarkMode ? Brightness.dark : Brightness.light,
         colorScheme: ColorScheme.fromSeed(
           seedColor: const Color(0xFF4A90E2),
           primary: const Color(0xFF4A90E2),
-          surface: const Color(0xFFF7F9FC),
+          brightness: isDarkMode ? Brightness.dark : Brightness.light,
         ),
-        scaffoldBackgroundColor: const Color(0xFFF7F9FC),
+        scaffoldBackgroundColor: isDarkMode ? const Color(0xFF0F172A) : const Color(0xFFF7F9FC),
         fontFamily: 'Roboto',
         useMaterial3: true,
       ),
-      home: const MainContainer(),
+      home: MainContainer(onThemeToggle: toggleTheme, isDarkMode: isDarkMode),
     );
   }
 }
 
 class MainContainer extends StatefulWidget {
-  const MainContainer({super.key});
+  final VoidCallback onThemeToggle;
+  final bool isDarkMode;
+
+  const MainContainer({super.key, required this.onThemeToggle, required this.isDarkMode});
 
   @override
   State<MainContainer> createState() => _MainContainerState();
@@ -37,11 +54,11 @@ class MainContainer extends StatefulWidget {
 class _MainContainerState extends State<MainContainer> {
   int _currentIndex = 0;
 
-  final List<Widget> _screens = [
-    const HomePage(),
-    const Center(child: Text('المساعد الذكي وحل المسائل', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold))),
-    const Center(child: Text('الملفات والمحفوظات', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold))),
-    const Center(child: Text('الملف الشخصي', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold))),
+  late final List<Widget> _screens = [
+    HomePage(onThemeToggle: widget.onThemeToggle, isDarkMode: widget.isDarkMode),
+    const SmartAssistantPage(),
+    const ArchivePage(),
+    const ProfilePage(),
   ];
 
   @override
@@ -51,7 +68,7 @@ class _MainContainerState extends State<MainContainer> {
       bottomNavigationBar: Container(
         margin: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: widget.isDarkMode ? const Color(0xFF1E293B) : Colors.white,
           borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
@@ -71,7 +88,7 @@ class _MainContainerState extends State<MainContainer> {
               });
             },
             type: BottomNavigationBarType.fixed,
-            backgroundColor: Colors.white,
+            backgroundColor: widget.isDarkMode ? const Color(0xFF1E293B) : Colors.white,
             selectedItemColor: const Color(0xFF4A90E2),
             unselectedItemColor: Colors.grey,
             selectedFontSize: 12,
@@ -87,7 +104,7 @@ class _MainContainerState extends State<MainContainer> {
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.folder_rounded),
-                label: 'ملفاتي',
+                label: 'الأرشيف والبنك',
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.person_rounded),
@@ -101,9 +118,12 @@ class _MainContainerState extends State<MainContainer> {
   }
 }
 
-// 🏠 الصفحة الرئيسية (الأقسام الكبرى)
+// 🏠 الصفحة الرئيسية المتكاملة
 class HomePage extends StatelessWidget {
-  const HomePage({super.key});
+  final VoidCallback onThemeToggle;
+  final bool isDarkMode;
+
+  const HomePage({super.key, required this.onThemeToggle, required this.isDarkMode});
 
   @override
   Widget build(BuildContext context) {
@@ -140,6 +160,12 @@ class HomePage extends StatelessWidget {
         centerTitle: true,
         elevation: 0,
         backgroundColor: Colors.transparent,
+        actions: [
+          IconButton(
+            icon: Icon(isDarkMode ? Icons.light_mode_rounded : Icons.dark_mode_rounded),
+            onPressed: onThemeToggle,
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -147,7 +173,7 @@ class HomePage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 10),
-            // أداة تحسين الصور
+            // أداة تحسين الصور المتقدمة HD
             Card(
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               elevation: 2,
@@ -166,23 +192,25 @@ class HomePage extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'مُحسّن دقة الصور HD 📸',
+                            'مُحسّن دقة الصور والملفات HD 📸',
                             style: TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
-                              fontSize: 16,
+                              fontSize: 15,
                             ),
                           ),
                           SizedBox(height: 4),
                           Text(
-                            'يقرا كلشي بدقة فائقة وبدون تغيير للتفاصيل',
-                            style: TextStyle(color: Colors.white70, fontSize: 12),
+                            'قراءة فائقة الدقة للرموز الهندسية والرياضية بدون تشويه',
+                            style: TextStyle(color: Colors.white70, fontSize: 11),
                           ),
                         ],
                       ),
                     ),
                     ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => const SmartAssistantPage()));
+                      },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF38BDF8),
                         foregroundColor: Colors.black,
@@ -190,7 +218,7 @@ class HomePage extends StatelessWidget {
                           borderRadius: BorderRadius.circular(10),
                         ),
                       ),
-                      child: const Text('رفع', style: TextStyle(fontWeight: FontWeight.bold)),
+                      child: const Text('فعلها', style: TextStyle(fontWeight: FontWeight.bold)),
                     ),
                   ],
                 ),
@@ -199,7 +227,7 @@ class HomePage extends StatelessWidget {
             const SizedBox(height: 24),
             const Text(
               'اختر المجموعة الدراسية:',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF1E293B)),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
             Expanded(
@@ -228,7 +256,6 @@ class HomePage extends StatelessWidget {
                       ),
                       trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 18, color: Colors.grey),
                       onTap: () {
-                        // الانتقال لصفحة الفروع التخصصية
                         Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -251,7 +278,7 @@ class HomePage extends StatelessWidget {
   }
 }
 
-// 🏛️ شاشة الفروع التخصصية (مثلاً فروع الهندسة)
+// 🏛️ شاشة الفروع
 class DepartmentsPage extends StatelessWidget {
   final String categoryTitle;
   final List<String> departments;
@@ -261,10 +288,7 @@ class DepartmentsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(categoryTitle, style: const TextStyle(fontWeight: FontWeight.bold)),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: Text(categoryTitle, style: const TextStyle(fontWeight: FontWeight.bold)), centerTitle: true),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: ListView.builder(
@@ -279,13 +303,7 @@ class DepartmentsPage extends StatelessWidget {
                 subtitle: const Text('اختر لعرض المراحل الدراسية', style: TextStyle(color: Colors.grey)),
                 trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 18),
                 onTap: () {
-                  // الانتقال للمراحل الدراسية
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => StagesPage(departmentName: departments[index]),
-                    ),
-                  );
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => StagesPage(departmentName: departments[index])));
                 },
               ),
             );
@@ -296,7 +314,7 @@ class DepartmentsPage extends StatelessWidget {
   }
 }
 
-// 📚 شاشة المراحل الدراسية (أولى، ثانية، ثالثة، رابعة)
+// 📚 شاشة المراحل
 class StagesPage extends StatelessWidget {
   final String departmentName;
 
@@ -307,10 +325,7 @@ class StagesPage extends StatelessWidget {
     final stages = ['المرحلة الأولى', 'المرحلة الثانية', 'المرحلة الثالثة', 'المرحلة الرابعة'];
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(departmentName, style: const TextStyle(fontWeight: FontWeight.bold)),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: Text(departmentName, style: const TextStyle(fontWeight: FontWeight.bold)), centerTitle: true),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: ListView.builder(
@@ -328,13 +343,7 @@ class StagesPage extends StatelessWidget {
                 title: Text(stages[index], style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                 trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 18),
                 onTap: () {
-                  // الانتقال للمواد الدراسية مع المصادر
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => SubjectsPage(stageName: stages[index]),
-                    ),
-                  );
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => SubjectsPage(stageName: stages[index])));
                 },
               ),
             );
@@ -345,7 +354,7 @@ class StagesPage extends StatelessWidget {
   }
 }
 
-// 📖 شاشة المواد الدراسية مع مصادرها المعتمدة
+// 📖 شاشة المواد والمصادر
 class SubjectsPage extends StatelessWidget {
   final String stageName;
 
@@ -353,7 +362,6 @@ class SubjectsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // قائمة المواد مع مصادرها الأكاديمية والشائعة في الجامعات العراقية
     final List<Map<String, String>> subjects = [
       {'name': 'ميكانيك التربة (Soil Mechanics)', 'source': 'المصدر المعتمد: Das / Bowles'},
       {'name': 'مقاومة المواد (Strength of Materials)', 'source': 'المصدر المعتمد: Hibbeler'},
@@ -362,10 +370,7 @@ class SubjectsPage extends StatelessWidget {
     ];
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text('المواد الدراسية - $stageName', style: const TextStyle(fontWeight: FontWeight.bold)),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: Text('المواد - $stageName', style: const TextStyle(fontWeight: FontWeight.bold)), centerTitle: true),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: ListView.builder(
@@ -381,13 +386,7 @@ class SubjectsPage extends StatelessWidget {
                 subtitle: Text(sub['source']!, style: const TextStyle(color: Color(0xFF4A90E2), fontSize: 12, fontWeight: FontWeight.w600)),
                 trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 18),
                 onTap: () {
-                  // الانتقال لصفحة رفع الملفات أو الصور وحل المسائل بناءً على المصدر
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => SubjectActionPage(subjectName: sub['name']!, sourceName: sub['source']!),
-                    ),
-                  );
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => SubjectActionPage(subjectName: sub['name']!, sourceName: sub['source']!)));
                 },
               ),
             );
@@ -398,7 +397,7 @@ class SubjectsPage extends StatelessWidget {
   }
 }
 
-// ⚙️ شاشة رفع الصور والملفات PDF وتوليد الحلول الذكية حسب المصدر
+// 🤖 شاشة المساعد الذكي وحل المسائل خطوة بخطوة
 class SubjectActionPage extends StatelessWidget {
   final String subjectName;
   final String sourceName;
@@ -408,10 +407,7 @@ class SubjectActionPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(subjectName, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: Text(subjectName, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold)), centerTitle: true),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
@@ -419,42 +415,69 @@ class SubjectActionPage extends StatelessWidget {
           children: [
             Container(
               padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: const Color(0xFF4A90E2).withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Text(
-                sourceName,
-                style: const TextStyle(color: Color(0xFF4A90E2), fontWeight: FontWeight.bold, fontSize: 13),
-                textAlign: TextAlign.center,
-              ),
+              decoration: BoxDecoration(color: const Color(0xFF4A90E2).withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
+              child: Text(sourceName, style: const TextStyle(color: Color(0xFF4A90E2), fontWeight: FontWeight.bold, fontSize: 12), textAlign: TextAlign.center),
             ),
-            const SizedBox(height: 30),
+            const SizedBox(height: 24),
             ElevatedButton.icon(
               onPressed: () {},
               icon: const Icon(Icons.camera_alt_rounded),
-              label: const Text('رفع صور الأسئلة (سؤال أو أكثر)', style: TextStyle(fontSize: 16)),
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                backgroundColor: const Color(0xFF4A90E2),
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-              ),
+              label: const Text('رفع وتصفيح صور الأسئلة (HD Engine)', style: TextStyle(fontSize: 15)),
+              style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16), backgroundColor: const Color(0xFF4A90E2), foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
             OutlinedButton.icon(
               onPressed: () {},
-              icon: const Icon(Icons.picture_as_pdf_rounded),
-              label: const Text('رفع ملف PDF للمادة', style: TextStyle(fontSize: 16)),
-              style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                side: const BorderSide(color: Color(0xFF4A90E2), width: 2),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-              ),
+              icon: const Icon(Icons.quiz_rounded),
+              label: const Text('توليد اختبارات Quiz ذكية للمحاضرة', style: TextStyle(fontSize: 15)),
+              style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16), side: const BorderSide(color: Color(0xFF4A90E2), width: 2), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
+            ),
+            const SizedBox(height: 12),
+            OutlinedButton.icon(
+              onPressed: () {},
+              icon: const Icon(Icons.translate_rounded),
+              label: const Text('الترجمة الأكاديمية الفورية للمصطلحات', style: TextStyle(fontSize: 15)),
+              style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16), side: const BorderSide(color: Colors.grey, width: 1.5), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
             ),
           ],
         ),
       ),
+    );
+  }
+}
+
+class SmartAssistantPage extends StatelessWidget {
+  const SmartAssistantPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('المساعد الذكي المركزي', style: TextStyle(fontWeight: FontWeight.bold)), centerTitle: true),
+      body: const Center(child: Text('اختر مادتك وابدأ برفع الأسئلة والملفات لتحليلها فوريًا', style: TextStyle(fontSize: 15, color: Colors.grey))),
+    );
+  }
+}
+
+class ArchivePage extends StatelessWidget {
+  const ArchivePage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('بنك الأسئلة والأرشيف العراقي', style: TextStyle(fontWeight: FontWeight.bold)), centerTitle: true),
+      body: const Center(child: Text('أرشيف الأسئلة الوزارية والجامعية حسب المحافظات', style: TextStyle(fontSize: 15, color: Colors.grey))),
+    );
+  }
+}
+
+class ProfilePage extends StatelessWidget {
+  const ProfilePage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('الملف الشخصي', style: TextStyle(fontWeight: FontWeight.bold)), centerTitle: true),
+      body: const Center(child: Text('إعدادات الحساب والمحفوظات الدراسية', style: TextStyle(fontSize: 15, color: Colors.grey))),
     );
   }
 }
