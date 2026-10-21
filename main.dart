@@ -22,7 +22,81 @@ class StudentApp extends StatelessWidget {
         fontFamily: 'Roboto',
         useMaterial3: true,
       ),
-      home: const HomePage(),
+      home: const MainContainer(),
+    );
+  }
+}
+
+class MainContainer extends StatefulWidget {
+  const MainContainer({super.key});
+
+  @override
+  State<MainContainer> createState() => _MainContainerState();
+}
+
+class _MainContainerState extends State<MainContainer> {
+  int _currentIndex = 0;
+
+  final List<Widget> _screens = [
+    const HomePage(),
+    const Center(child: Text('شاشة البحث والذكاء الاصطناعي', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold))),
+    const Center(child: Text('الملفات والمحفوظات', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold))),
+    const Center(child: Text('الملف الشخصي', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold))),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: _screens[_currentIndex],
+      bottomNavigationBar: Container(
+        margin: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 20,
+              offset: const Offset(0, 5),
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(24),
+          child: BottomNavigationBar(
+            currentIndex: _currentIndex,
+            onTap: (index) {
+              setState(() {
+                _currentIndex = index;
+              });
+            },
+            type: BottomNavigationBarType.fixed,
+            backgroundColor: Colors.white,
+            selectedItemColor: const Color(0xFF4A90E2),
+            unselectedItemColor: Colors.grey,
+            selectedFontSize: 12,
+            unselectedFontSize: 12,
+            items: const [
+              BottomNavigationBarItem(
+                icon: Icon(Icons.home_rounded),
+                label: 'الرئيسية',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.auto_awesome_rounded),
+                label: 'المساعد الذكي',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.folder_rounded),
+                label: 'ملفاتي',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.person_rounded),
+                label: 'حسابي',
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
